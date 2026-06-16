@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import type { LogEntry } from '@/types/game'
 
 interface Props {
   logs: LogEntry[]
+  highlightedTurn?: number
 }
 
 const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  (e: 'hover-log', turn: number | null): void
+}>()
 
 const logContainer = ref<HTMLElement | null>(null)
 
@@ -65,7 +70,13 @@ watch(
       <div
         v-for="log in logs"
         :key="log.id"
-        :class="[getLogColor(log.type), 'animate-slide-up text-sm leading-relaxed flex items-start gap-2']"
+        :class="[
+          getLogColor(log.type),
+          'animate-slide-up text-sm leading-relaxed flex items-start gap-2 px-2 py-1.5 rounded-md transition-all duration-200 cursor-default',
+          highlightedTurn === log.turn ? 'bg-white/10 -mx-2' : 'hover:bg-white/5 -mx-2',
+        ]"
+        @mouseenter="emit('hover-log', log.turn)"
+        @mouseleave="emit('hover-log', null)"
       >
         <span class="flex-shrink-0">{{ getLogIcon(log.type) }}</span>
         <span>{{ log.text }}</span>

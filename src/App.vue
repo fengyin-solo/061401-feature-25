@@ -1,14 +1,25 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import StatusPanel from '@/components/StatusPanel.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import EventLog from '@/components/EventLog.vue'
+import SurvivalTrend from '@/components/SurvivalTrend.vue'
 import GameOverModal from '@/components/GameOverModal.vue'
 import { useGame } from '@/composables/useGame'
 
 const { state, highScore, canPerformAction, gatherWood, gatherStone, hunt, drink, restart } = useGame()
 
 const isNewRecord = computed(() => state.value.turn >= highScore.value && state.value.turn > 0)
+
+const highlightedTurn = ref<number | null>(null)
+
+function handleTrendHover(turn: number | null) {
+  highlightedTurn.value = turn
+}
+
+function handleLogHover(turn: number | null) {
+  highlightedTurn.value = turn
+}
 </script>
 
 <template>
@@ -46,6 +57,11 @@ const isNewRecord = computed(() => state.value.turn >= highScore.value && state.
             :wood="state.wood"
             :stone="state.stone"
           />
+          <SurvivalTrend
+            :history="state.history"
+            :highlighted-turn="highlightedTurn ?? undefined"
+            @hover="handleTrendHover"
+          />
         </div>
 
         <div>
@@ -63,7 +79,11 @@ const isNewRecord = computed(() => state.value.turn >= highScore.value && state.
         </div>
 
         <div>
-          <EventLog :logs="state.logs" />
+          <EventLog
+            :logs="state.logs"
+            :highlighted-turn="highlightedTurn ?? undefined"
+            @hover-log="handleLogHover"
+          />
         </div>
       </div>
 

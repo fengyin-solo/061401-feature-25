@@ -1,3 +1,10 @@
+export interface StatsSnapshot {
+  turn: number
+  health: number
+  hunger: number
+  thirst: number
+}
+
 export interface GameState {
   health: number
   hunger: number
@@ -7,6 +14,7 @@ export interface GameState {
   turn: number
   isGameOver: boolean
   logs: LogEntry[]
+  history: StatsSnapshot[]
 }
 
 export interface LogEntry {

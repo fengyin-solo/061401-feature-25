@@ -1,5 +1,5 @@
-import { ref, computed, watch } from 'vue'
-import type { GameState, LogEntry, RandomEvent, ActionType, ActionEffect } from '@/types/game'
+import { ref, computed } from 'vue'
+import type { GameState, LogEntry, RandomEvent, ActionType, ActionEffect, StatsSnapshot } from '@/types/game'
 import { randomEvents } from '@/data/events'
 
 const STORAGE_KEY_HIGH_SCORE = 'survival_game_high_score'
@@ -33,6 +33,7 @@ export function useGame() {
     turn: 0,
     isGameOver: false,
     logs: [],
+    history: [],
   })
 
   const highScore = ref<number>(0)
@@ -71,6 +72,19 @@ export function useGame() {
     })
     if (state.value.logs.length > 50) {
       state.value.logs.pop()
+    }
+  }
+
+  function recordSnapshot() {
+    const snapshot: StatsSnapshot = {
+      turn: state.value.turn,
+      health: state.value.health,
+      hunger: state.value.hunger,
+      thirst: state.value.thirst,
+    }
+    state.value.history.push(snapshot)
+    if (state.value.history.length > 100) {
+      state.value.history.shift()
     }
   }
 
@@ -136,6 +150,7 @@ export function useGame() {
     const eventLogType = event.type === 'good' ? 'good' : event.type === 'bad' ? 'bad' : 'event'
     addLog(event.text, eventLogType)
 
+    recordSnapshot()
     checkGameOver()
   }
 
@@ -165,13 +180,16 @@ export function useGame() {
       turn: 0,
       isGameOver: false,
       logs: [],
+      history: [],
     }
     logIdCounter = 0
     addLog('你醒来发现自己身处荒野中，需要想办法生存下去...', 'system')
+    recordSnapshot()
   }
 
   loadHighScore()
   addLog('你醒来发现自己身处荒野中，需要想办法生存下去...', 'system')
+  recordSnapshot()
 
   return {
     state,
